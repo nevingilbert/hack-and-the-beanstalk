@@ -37,7 +37,8 @@ public class BackgroundService extends IntentService {
             mEMA = 0.0;
         }
 
-        VolumeThread thread = new VolumeThread(this, mic);
+        double initDB = 20 * Math.log10(mic.getMaxAmplitude() / 32767);
+        VolumeThread thread = new VolumeThread(this, mic, initDB);
 
 
         new Thread(thread).start();
@@ -72,5 +73,14 @@ public class BackgroundService extends IntentService {
         notificationManager.notify(0, n);
     }
 
+    @Override
+    public boolean stopService(Intent name) {
+        if (mic != null) {
+            mic.stop();
+            mic.release();
+            mic = null;
+        }
 
+        return super.stopService(name);
+    }
 }

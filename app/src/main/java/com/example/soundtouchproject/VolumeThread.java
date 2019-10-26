@@ -2,6 +2,7 @@ package com.example.soundtouchproject;
 
 import android.content.Context;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,16 +21,48 @@ import static com.example.soundtouchproject.BackgroundService.sendNotification;
 
 public class VolumeThread implements Runnable {
 
+    public static final double ERROR_DB = -1;
+    public static final double VOLUME_CHANGE = 10;
+
     private Context context;
     private MediaRecorder mic;
 
-    public VolumeThread(Context context, MediaRecorder mic) {
+    //initial overall volume
+    private double targetDecibals;
+
+    //last set volume for speaker
+    private double previousSpeakerVolume = -1;
+
+    //TODO: current speaker volume
+    private int currentSpeakerVolume;
+
+    public VolumeThread(Context context, MediaRecorder mic, double initDB) {
         this.context = context;
         this.mic = mic;
+        this.targetDecibals = initDB;
     }
 
     @Override
     public void run() {
+
+        Log.println(Log.DEBUG, "Decibal units or volume units",
+                Double.toString(20 * Math.log10(mic.getMaxAmplitude() / 32767)));
+
+//        double micVolume = 20 * Math.log10(mic.getMaxAmplitude() / 32767);
+//        if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
+//            //TODO: Restart background service
+//        }
+//
+//
+//        if (targetDecibals - micVolume > ERROR_DB) {
+//            currentSpeakerVolume += VOLUME_CHANGE;
+//        } else if (micVolume - targetDecibals < ERROR_DB) {
+//            currentSpeakerVolume += VOLUME_CHANGE;
+//        }
+//
+//        setSpeakerVolume(currentSpeakerVolume);
+//        previousSpeakerVolume = currentSpeakerVolume;
+//
 
     }
 
