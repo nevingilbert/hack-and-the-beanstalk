@@ -18,8 +18,8 @@ import java.util.Map;
 
 public class BackgroundService extends IntentService {
 
-    public BackgroundService(String name){
-        super(name);
+    public BackgroundService(){
+        super("Background Speaker Service");
     }
 
     @Override
@@ -32,10 +32,10 @@ public class BackgroundService extends IntentService {
 
     }
 
-    private void function(){
+    private void setSpeakerVolume(int volume){
         // Add the request to the RequestQueue.
         // Request a string response from the provided URL.
-        final String requestBody = String.format(Locale.US, "<volume>%d</volume>", 0);
+        final String requestBody = String.format(Locale.US, "<volume>%d</volume>", volume);
         final String url = "http://192.168.1.14:8090/volume";
         final RequestQueue queue = Volley.newRequestQueue(this);
 
