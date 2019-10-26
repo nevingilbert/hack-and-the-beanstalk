@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.example.soundtouchproject.BackgroundService.sendNotification;
-
 public class VolumeThread implements Runnable {
 
     public static final double ERROR_DB = -1;
@@ -92,7 +90,7 @@ public class VolumeThread implements Runnable {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                sendNotification("Network Request error", error.getLocalizedMessage(), context);
+                Log.println(Log.ERROR, "Netowork error", error.getMessage());
             }
         }) {
             @Override
