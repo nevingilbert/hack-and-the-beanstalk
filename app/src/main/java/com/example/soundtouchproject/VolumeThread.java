@@ -3,6 +3,7 @@ package com.example.soundtouchproject;
 import android.content.Context;
 import android.media.MediaRecorder;
 import android.util.Log;
+import android.util.Xml;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -27,6 +28,7 @@ public class VolumeThread implements Runnable {
 
     //initial overall volume
     private double targetDecibals;
+    private boolean loop;
 
     //last set volume for speaker
     private double previousSpeakerVolume = -1;
@@ -48,7 +50,7 @@ public class VolumeThread implements Runnable {
                     Double.toString(mic.getMaxAmplitude()));
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -112,5 +114,47 @@ public class VolumeThread implements Runnable {
             }
         };
         queue.add(stringRequest);
+    }
+
+    private int getSpeakerVolume() {
+        // Add the request to the RequestQueue.
+        // Request a string response from the provided URL.
+        final String url = "http://192.168.1.14:8090/volume";
+        final RequestQueue queue = Volley.newRequestQueue(context);
+        final StringBuilder rawResponse = new StringBuilder();
+
+        final StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        rawResponse.append(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.println(Log.ERROR, "Netowork error", error.getMessage());
+            }
+        }) {
+            @Override
+            public Map<String, String> getParams() {
+                HashMap<String, String> out = new HashMap<>();
+                out.put("Content-Type", "application/xml");
+                return out;
+            }
+        };
+        queue.add(stringRequest);
+        loop = true;
+        queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<String>() {
+            @Override
+            public void onRequestFinished(Request<String> request) {
+                loop = false;
+            }
+        });
+        while (loop);
+        int start = rawResponse.indexOf("<actualvolume>") + "<actualvolume>".length();
+        int end = rawResponse.indexOf("</actualvolume>");
+        int out = Integer.parseInt(rawResponse.substring(start, end));
+        return out;
     }
 }
