@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.MediaRecorder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -40,6 +41,7 @@ public class BackgroundService extends IntentService {
         double initDB = 20 * Math.log10(mic.getMaxAmplitude() / 32767);
         VolumeThread thread = new VolumeThread(this, mic, initDB);
 
+        Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 
         new Thread(thread).start();
         return START_STICKY;
@@ -48,29 +50,6 @@ public class BackgroundService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
-    }
-
-
-    public static void sendNotification(String title, String body, Context context) {
-        // prepare intent which is triggered if the
-        // notification is selected
-
-        //Intent intent = new Intent(this, NotificationReceiver.class);
-        //PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        // build notification
-        // the addAction re-use the same intent to keep the example short
-        Notification n = new Notification.Builder(context)
-                .setContentTitle(title)
-                .setContentText(body)
-//                .setContentIntent(pIntent)
-                .setAutoCancel(true).build();
-
-
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-
-        notificationManager.notify(0, n);
     }
 
     @Override

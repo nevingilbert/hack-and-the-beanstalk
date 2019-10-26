@@ -1,6 +1,9 @@
 package com.example.soundtouchproject;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -45,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startService() {
-        BackgroundService myService = new BackgroundService();
-        myService.startService(this.getIntent());
+        startService(new Intent(getApplicationContext(), BackgroundService.class));
     }
 
     ;
