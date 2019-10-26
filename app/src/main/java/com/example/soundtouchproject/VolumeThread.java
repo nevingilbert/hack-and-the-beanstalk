@@ -45,7 +45,7 @@ public class VolumeThread implements Runnable {
 
         while (true) {
             Log.println(Log.DEBUG, "Decibal units or volume units",
-                    Double.toString(20 * Math.log10(mic.getMaxAmplitude() / 32767)));
+                    Double.toString(mic.getMaxAmplitude()));
 
             try {
                 Thread.sleep(100);
