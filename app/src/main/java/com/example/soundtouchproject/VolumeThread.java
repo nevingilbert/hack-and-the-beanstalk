@@ -45,8 +45,17 @@ public class VolumeThread implements Runnable {
     @Override
     public void run() {
 
-        Log.println(Log.DEBUG, "Decibal units or volume units",
-                Double.toString(20 * Math.log10(mic.getMaxAmplitude() / 32767)));
+        while (true) {
+            Log.println(Log.DEBUG, "Decibal units or volume units",
+                    Double.toString(20 * Math.log10(mic.getMaxAmplitude() / 32767)));
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
 
 //        double micVolume = 20 * Math.log10(mic.getMaxAmplitude() / 32767);
 //        if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
