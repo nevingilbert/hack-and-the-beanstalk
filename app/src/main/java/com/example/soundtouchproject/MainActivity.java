@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Button button = findViewById(R.id.button);
         final TextView textView = findViewById(R.id.textView);
-        
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
             textView.setText("This app needs Internet permission. Please grant it.");
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startService(){
-        BackgroundService myService = new BackgroundService("Soundtouch Background Service");
+        BackgroundService myService = new BackgroundService();
         myService.startService(this.getIntent());
     };
 }
