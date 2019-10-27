@@ -35,8 +35,6 @@ public class VolumeThread extends Thread {
 
     private final AtomicBoolean loop = new AtomicBoolean(false);
     public volatile boolean loopPrim = false;
-
-
     private int currentSpeakerVolume;
 
     private int MIN, MAX;
@@ -65,17 +63,17 @@ public class VolumeThread extends Thread {
                 return;
             }
 
-            //TODO: Verify
-            if (currentSpeakerVolume != getSpeakerVolume(true)) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                targetIntensity = micIntensity;
-                currentSpeakerVolume = getSpeakerVolume(true);
-                Log.println(Log.DEBUG, "Feature", "Normalized Target");
-            }
+            //TODO: Implement a feature so that if the user changes the volume manually, then we assume they have a found a new comfortable sound, and normalize
+//            if (currentSpeakerVolume != getSpeakerVolume(true)) {
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                targetIntensity = micIntensity;
+//                currentSpeakerVolume = getSpeakerVolume(true);
+//                Log.println(Log.DEBUG, "Feature", "Normalized Target");
+//            }
 
             if (targetIntensity - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= MAX - VOLUME_CHANGE) {
                 currentSpeakerVolume += VOLUME_CHANGE;
@@ -178,23 +176,12 @@ public class VolumeThread extends Thread {
         try {
             return Integer.parseInt(responseString.substring(start, end));
         } catch (Exception e) {
-            throw new RuntimeException("A response was expected but nothing was recieved. Please check your internet connection.");
+            throw new RuntimeException("A response was expected but nothing was received. Please check your internet connection.");
         }
     }
 
-//    public void stop() {
-//        if (mic != null) {
-//            mic.getMic().stop();
-//            mic.getMic().release();
-//            mic = null;
-//        }
-//        loop.set(false);
-//        Log.println(Log.DEBUG, "AM I REACHING THIS?", "YES");
-//        Thread.currentThread().interrupt();
-//    }
-
     public void setLoop(boolean in) {
-        Log.println(Log.ERROR, "HELP", "HELP");
+        Log.println(Log.ERROR, "Thread", "Trying to terminate volume Thread");
         loop.set(in);
         loopPrim = in;
     }

@@ -53,10 +53,7 @@ public class BackgroundService extends IntentService {
         }
 
         thread = new VolumeThread(getApplicationContext(), mic, 1.1 * sum / n, MIN, MAX);
-
-        Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
-
-        new Thread(thread).start();
+        thread.start();
         return START_STICKY;
     }
 
@@ -73,11 +70,11 @@ public class BackgroundService extends IntentService {
             mic = null;
         }
 
-        Log.println(Log.DEBUG, "Service's stop method", "called");
+        Log.println(Log.INFO, "Services", "Stopping Background Service");
         thread.interrupt();
         thread.setLoop(false);
         thread.loopPrim = false;
-        Log.println(Log.DEBUG, "Finished service stop", "finished");
+        Log.println(Log.INFO, "Services", "Stopped Background Service");
 
         return super.stopService(name);
     }

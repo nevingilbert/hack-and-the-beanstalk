@@ -82,15 +82,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startService() {
-        Log.println(Log.DEBUG, "Service starter method", "Called");
+        Log.println(Log.INFO, "Services", "Starting Background Service");
         serviceStarted = true;
         startService(new Intent(getApplicationContext(), BackgroundService.class));
+        Log.println(Log.INFO, "Services", "Started Background Service");
     }
 
     private void stopService() {
-        Log.println(Log.DEBUG, "Service stopper", "called");
+        Log.println(Log.INFO, "Services", "Stopping Background Service");
         serviceStarted = false;
         stopService(new Intent(getApplicationContext(), BackgroundService.class));
+        Log.println(Log.INFO, "Services", "Stopped Background Service");
+
 
     }
 }
