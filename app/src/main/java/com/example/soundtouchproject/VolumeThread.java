@@ -1,7 +1,6 @@
 package com.example.soundtouchproject;
 
 import android.content.Context;
-import android.media.MediaRecorder;
 import android.os.StrictMode;
 import android.util.Log;
 
