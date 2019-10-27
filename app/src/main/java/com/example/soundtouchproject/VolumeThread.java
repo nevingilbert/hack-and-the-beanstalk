@@ -22,8 +22,8 @@ import okhttp3.Response;
 
 public class VolumeThread implements Runnable {
 
-    public static final double ERROR_INTENSITY = 2000;
-    public static final double VOLUME_CHANGE = 10;
+    public static final double ERROR_INTENSITY = 10;
+    public static final double VOLUME_CHANGE = 5;
 
     private Context context;
     private MediaRecorder mic;
@@ -43,7 +43,6 @@ public class VolumeThread implements Runnable {
         this.mic = mic;
         this.targetIntenstiy = initIntensity;
         int a = getSpeakerVolume();
-        setSpeakerVolume(25);
         Log.println(Log.DEBUG, "Speaker volume test", Integer.toString(a));
         this.currentSpeakerVolume = getSpeakerVolume();
 

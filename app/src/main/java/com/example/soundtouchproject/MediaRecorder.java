@@ -13,6 +13,6 @@ public class MediaRecorder {
     }
 
     public double getIntensity() {
-        return (Math.sqrt(mic.getMaxAmplitude()) - Math.sqrt(300)) / Math.sqrt(30000) * 100;
+        return (Math.sqrt(mic.getMaxAmplitude()) - Math.sqrt(0)) / Math.sqrt(30000) * 100;
     }
 }
