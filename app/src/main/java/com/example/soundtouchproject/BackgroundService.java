@@ -12,6 +12,8 @@ public class BackgroundService extends IntentService {
     public final int MIN = 20;
     public final int MAX = 70;
 
+    private VolumeThread thread;
+
     private MediaRecorder mic = null;
 
     public BackgroundService() {
@@ -42,7 +44,7 @@ public class BackgroundService extends IntentService {
 
         while (System.currentTimeMillis() < startTime + 2000) {
             try {
-                Thread.sleep(150);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -50,7 +52,7 @@ public class BackgroundService extends IntentService {
             n++;
         }
 
-        VolumeThread thread = new VolumeThread(getApplicationContext(), mic, 1.1 * sum / n, MIN, MAX);
+        thread = new VolumeThread(getApplicationContext(), mic, 1.1 * sum / n, MIN, MAX);
 
         Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 
@@ -70,6 +72,12 @@ public class BackgroundService extends IntentService {
             mic.getMic().release();
             mic = null;
         }
+
+        Log.println(Log.DEBUG, "Service's stop method", "called");
+        thread.interrupt();
+        thread.setLoop(false);
+        thread.loopPrim = false;
+        Log.println(Log.DEBUG, "Finished service stop", "finished");
 
         return super.stopService(name);
     }
