@@ -54,9 +54,9 @@ public class VolumeThread implements Runnable {
                 Log.println(Log.DEBUG, "Feature", "No impl.");
             }
 
-            if (targetIntenstiy - micIntensity > ERROR_INTENSITY) {
+            if (targetIntenstiy - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= 100) {
                 currentSpeakerVolume += VOLUME_CHANGE;
-            } else if (micIntensity - targetIntenstiy < ERROR_INTENSITY) {
+            } else if (micIntensity - targetIntenstiy < ERROR_INTENSITY && currentSpeakerVolume >= 0) {
                 currentSpeakerVolume += VOLUME_CHANGE;
             }
 
