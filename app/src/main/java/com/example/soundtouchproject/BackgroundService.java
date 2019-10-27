@@ -36,10 +36,15 @@ public class BackgroundService extends IntentService {
         }
 
         double initIntensity = 0;
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         while (initIntensity == 0) {
             initIntensity = mic.getMaxAmplitude();
         }
-        VolumeThread thread = new VolumeThread(this, mic, initIntensity);
+        VolumeThread thread = new VolumeThread(getApplicationContext(), mic, initIntensity);
 
         Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 
