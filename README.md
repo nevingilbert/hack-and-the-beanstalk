@@ -1,4 +1,4 @@
-#Beanstalk
+# Beanstalk
 ### Inspiration
 Group study is very common and when conversations break out, people find their discussion drowned out by the music. Even after fumbling with the volume controls, it is difficult to find and maintain a comfortable volume for everyone.
 
