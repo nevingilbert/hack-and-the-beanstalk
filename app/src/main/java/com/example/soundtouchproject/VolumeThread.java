@@ -24,6 +24,7 @@ public class VolumeThread implements Runnable {
 
     public static final double ERROR_INTENSITY = 10;
     public static final double VOLUME_CHANGE = 5;
+    public static final int FRAME_GAP = 150;
 
     private Context context;
     private MediaRecorder mic;
@@ -40,9 +41,7 @@ public class VolumeThread implements Runnable {
         this.context = context;
         this.mic = mic;
         this.targetIntenstiy = initIntensity;
-        int a = getSpeakerVolume();
-        Log.println(Log.DEBUG, "Speaker volume test", Integer.toString(a));
-        this.currentSpeakerVolume = getSpeakerVolume();
+        this.currentSpeakerVolume = getSpeakerVolume(false);
 
         this.MIN = min;
         this.MAX = max;
@@ -55,16 +54,18 @@ public class VolumeThread implements Runnable {
             double micIntensity = mic.getIntensity();
             Log.println(Log.DEBUG, "Current Speaker Volume", Double.toString(currentSpeakerVolume));
             Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntenstiy));
-            Log.println(Log.DEBUG, "Current Intensity \n", Double.toString(micIntensity));
+            Log.println(Log.DEBUG, "Current Intensity", Double.toString(micIntensity));
 
-            if (currentSpeakerVolume != getSpeakerVolume()) {
+
+            //TODO: Verify
+            if (currentSpeakerVolume != getSpeakerVolume(true)) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 targetIntenstiy = micIntensity;
-                currentSpeakerVolume = getSpeakerVolume();
+                currentSpeakerVolume = getSpeakerVolume(true);
                 Log.println(Log.DEBUG, "Feature", "Normalized Target");
             }
 
@@ -77,7 +78,7 @@ public class VolumeThread implements Runnable {
             }
 
             try {
-                Thread.sleep(150);
+                Thread.sleep(FRAME_GAP);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -125,7 +126,7 @@ public class VolumeThread implements Runnable {
         queue.add(stringRequest);
     }
 
-    private int getSpeakerVolume() {
+    private int getSpeakerVolume(boolean target) {
         OkHttpClient client = new OkHttpClient();
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -152,8 +153,16 @@ public class VolumeThread implements Runnable {
             e.printStackTrace();
         }
 
-        int start = responseString.indexOf("<actualvolume>") + "<actualvolume>".length();
-        int end = responseString.indexOf("</actualvolume>");
+        int start = 0;
+        int end = 0;
+
+        if (target) {
+            start = responseString.indexOf("<targetvolume>") + "<targetvolume>".length();
+            end = responseString.indexOf("</targetvolume>");
+        } else {
+            start = responseString.indexOf("<actualvolume>") + "<actualvolume>".length();
+            end = responseString.indexOf("</actualvolume>");
+        }
 
         Log.println(Log.DEBUG, "SubstringStart", Integer.toString(start));
         Log.println(Log.DEBUG, "SubstringEnd", Integer.toString(end));
