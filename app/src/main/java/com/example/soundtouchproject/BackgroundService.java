@@ -38,8 +38,7 @@ public class BackgroundService extends IntentService {
             mEMA = 0.0;
         }
 
-        double initDB = 20 * Math.log10(mic.getMaxAmplitude() / 32767);
-        VolumeThread thread = new VolumeThread(this, mic, initDB);
+        VolumeThread thread = new VolumeThread(this, mic, mic.getMaxAmplitude());
 
         Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 

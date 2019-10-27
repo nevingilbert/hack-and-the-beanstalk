@@ -3,7 +3,6 @@ package com.example.soundtouchproject;
 import android.content.Context;
 import android.media.MediaRecorder;
 import android.util.Log;
-import android.util.Xml;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,34 +19,46 @@ import java.util.Map;
 
 public class VolumeThread implements Runnable {
 
-    public static final double ERROR_DB = -1;
+    public static final double ERROR_INTENSITY = 1000;
     public static final double VOLUME_CHANGE = 10;
 
     private Context context;
     private MediaRecorder mic;
 
     //initial overall volume
-    private double targetDecibals;
+    private double targetIntenstiy;
     private boolean loop;
 
     //last set volume for speaker
     private double previousSpeakerVolume = -1;
 
-    //TODO: current speaker volume
     private int currentSpeakerVolume;
 
-    public VolumeThread(Context context, MediaRecorder mic, double initDB) {
+    public VolumeThread(Context context, MediaRecorder mic, double initIntensity) {
         this.context = context;
         this.mic = mic;
-        this.targetDecibals = initDB;
+        this.targetIntenstiy = initIntensity;
+        this.currentSpeakerVolume = getSpeakerVolume();
     }
 
     @Override
     public void run() {
 
         while (true) {
-            Log.println(Log.DEBUG, "Decibal units or volume units",
-                    Double.toString(mic.getMaxAmplitude()));
+            double micIntensity = mic.getMaxAmplitude();
+            if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
+                Log.println(Log.DEBUG, "Feature", "No impl.");
+            }
+
+
+            if (targetIntenstiy - micIntensity > ERROR_INTENSITY) {
+                currentSpeakerVolume += VOLUME_CHANGE;
+            } else if (micIntensity - targetIntenstiy < ERROR_INTENSITY) {
+                currentSpeakerVolume += VOLUME_CHANGE;
+            }
+
+            setSpeakerVolume(currentSpeakerVolume);
+            previousSpeakerVolume = currentSpeakerVolume;
 
             try {
                 Thread.sleep(150);
@@ -55,24 +66,6 @@ public class VolumeThread implements Runnable {
                 e.printStackTrace();
             }
         }
-
-
-//        double micVolume = 20 * Math.log10(mic.getMaxAmplitude() / 32767);
-//        if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
-//            //TODO: Restart background service
-//        }
-//
-//
-//        if (targetDecibals - micVolume > ERROR_DB) {
-//            currentSpeakerVolume += VOLUME_CHANGE;
-//        } else if (micVolume - targetDecibals < ERROR_DB) {
-//            currentSpeakerVolume += VOLUME_CHANGE;
-//        }
-//
-//        setSpeakerVolume(currentSpeakerVolume);
-//        previousSpeakerVolume = currentSpeakerVolume;
-//
-
     }
 
     private void setSpeakerVolume(int volume) {
@@ -151,7 +144,7 @@ public class VolumeThread implements Runnable {
                 loop = false;
             }
         });
-        while (loop);
+        while (loop) ;
         int start = rawResponse.indexOf("<actualvolume>") + "<actualvolume>".length();
         int end = rawResponse.indexOf("</actualvolume>");
         int out = Integer.parseInt(rawResponse.substring(start, end));
