@@ -1,20 +1,25 @@
 package com.example.soundtouchproject;
 
 import android.content.Context;
+import android.media.MediaRecorder;
+import android.os.StrictMode;
 import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class VolumeThread implements Runnable {
 
@@ -26,7 +31,6 @@ public class VolumeThread implements Runnable {
 
     //initial overall volume
     private double targetIntenstiy;
-    private boolean loop;
 
     //last set volume for speaker
     private double previousSpeakerVolume = -1;
@@ -39,6 +43,9 @@ public class VolumeThread implements Runnable {
         this.context = context;
         this.mic = mic;
         this.targetIntenstiy = initIntensity;
+        int a = getSpeakerVolume();
+        setSpeakerVolume(25);
+        Log.println(Log.DEBUG, "Speaker volume test", Integer.toString(a));
         this.currentSpeakerVolume = getSpeakerVolume();
 
         this.MIN = min;
@@ -83,17 +90,17 @@ public class VolumeThread implements Runnable {
         final String url = "http://192.168.1.14:8090/volume";
         final RequestQueue queue = Volley.newRequestQueue(context);
 
-        final StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
+        final StringRequest stringRequest = new StringRequest(com.android.volley.Request.Method.POST, url,
+                new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
                         //CODE HERE
                     }
-                }, new Response.ErrorListener() {
+                }, new com.android.volley.Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.println(Log.ERROR, "Netowork error", error.getMessage());
+                //Log.println(Log.ERROR, "Network error", error.getMessage());
             }
         }) {
             @Override
@@ -118,44 +125,42 @@ public class VolumeThread implements Runnable {
     }
 
     private int getSpeakerVolume() {
-        // Add the request to the RequestQueue.
-        // Request a string response from the provided URL.
-        final String url = "http://192.168.1.14:8090/volume";
-        final RequestQueue queue = Volley.newRequestQueue(context);
-        final StringBuilder rawResponse = new StringBuilder();
+        OkHttpClient client = new OkHttpClient();
 
-        final StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        rawResponse.append(response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.println(Log.ERROR, "Netowork error", error.getMessage());
-            }
-        }) {
-            @Override
-            public Map<String, String> getParams() {
-                HashMap<String, String> out = new HashMap<>();
-                out.put("Content-Type", "application/xml");
-                return out;
-            }
-        };
-        queue.add(stringRequest);
-        loop = true;
-        queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<String>() {
-            @Override
-            public void onRequestFinished(Request<String> request) {
-                loop = false;
-            }
-        });
-        while (loop) ;
-        int start = rawResponse.indexOf("<actualvolume>") + "<actualvolume>".length();
-        int end = rawResponse.indexOf("</actualvolume>");
-        int out = Integer.parseInt(rawResponse.substring(start, end));
-        return out;
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
+
+        Request request = new Request.Builder()
+                .url("http://192.168.1.14:8090/volume")
+                .get()
+                .addHeader("Content-Type", "application/xml")
+                .addHeader("Accept", "*/*")
+                .addHeader("Cache-Control", "no-cache")
+                .addHeader("Host", "http://192.168.1.14:8090")
+                .addHeader("Accept-Encoding", "gzip, deflate")
+                .addHeader("Connection", "keep-alive")
+                .addHeader("cache-control", "no-cache")
+                .build();
+
+        String responseString = "";
+        try {
+            Response response = client.newCall(request).execute();
+            responseString = response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int start = responseString.indexOf("<actualvolume>") + "<actualvolume>".length();
+        int end = responseString.indexOf("</actualvolume>");
+
+        Log.println(Log.DEBUG, "SubstringStart", Integer.toString(start));
+        Log.println(Log.DEBUG, "SubstringEnd", Integer.toString(end));
+
+        if (start < 0 || end > responseString.length()) {
+            return -1;
+        }
+
+        return Integer.parseInt(responseString.substring(start, end));
     }
 }
