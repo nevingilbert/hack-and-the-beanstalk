@@ -48,7 +48,7 @@ public class VolumeThread implements Runnable {
             double micIntensity = mic.getMaxAmplitude();
             Log.println(Log.DEBUG, "Current Speaker Volume",  Double.toString(currentSpeakerVolume));
             Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntenstiy));
-            Log.println(Log.DEBUG, "Current Intensity", Double.toString(targetIntenstiy));
+            Log.println(Log.DEBUG, "Current Intensity", Double.toString(micIntensity));
 
             if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
                 Log.println(Log.DEBUG, "Feature", "No impl.");
@@ -57,7 +57,7 @@ public class VolumeThread implements Runnable {
             if (targetIntenstiy - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= 100) {
                 currentSpeakerVolume += VOLUME_CHANGE;
             } else if (micIntensity - targetIntenstiy < ERROR_INTENSITY && currentSpeakerVolume >= 0) {
-                currentSpeakerVolume += VOLUME_CHANGE;
+                currentSpeakerVolume -= VOLUME_CHANGE;
             }
 
             setSpeakerVolume(currentSpeakerVolume);
