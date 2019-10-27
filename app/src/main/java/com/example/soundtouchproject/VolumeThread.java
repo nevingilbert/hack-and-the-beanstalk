@@ -31,8 +31,6 @@ public class VolumeThread implements Runnable {
     //initial overall volume
     private double targetIntenstiy;
 
-    //last set volume for speaker
-    private double previousSpeakerVolume = -1;
 
     private int currentSpeakerVolume;
 
@@ -57,10 +55,17 @@ public class VolumeThread implements Runnable {
             double micIntensity = mic.getIntensity();
             Log.println(Log.DEBUG, "Current Speaker Volume", Double.toString(currentSpeakerVolume));
             Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntenstiy));
-            Log.println(Log.DEBUG, "Current Intensity", Double.toString(micIntensity));
+            Log.println(Log.DEBUG, "Current Intensity \n", Double.toString(micIntensity));
 
-            if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
-                Log.println(Log.DEBUG, "Feature", "No impl.");
+            if (currentSpeakerVolume != getSpeakerVolume()) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                targetIntenstiy = micIntensity;
+                currentSpeakerVolume = getSpeakerVolume();
+                Log.println(Log.DEBUG, "Feature", "Normalized Target");
             }
 
             if (targetIntenstiy - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= MAX - VOLUME_CHANGE) {
@@ -70,8 +75,6 @@ public class VolumeThread implements Runnable {
                 currentSpeakerVolume -= VOLUME_CHANGE;
                 setSpeakerVolume(currentSpeakerVolume);
             }
-
-            previousSpeakerVolume = currentSpeakerVolume;
 
             try {
                 Thread.sleep(150);
