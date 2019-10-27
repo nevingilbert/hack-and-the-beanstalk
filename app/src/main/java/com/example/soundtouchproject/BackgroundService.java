@@ -2,7 +2,6 @@ package com.example.soundtouchproject;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.media.MediaRecorder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -20,26 +19,26 @@ public class BackgroundService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (mic == null) {
-            mic = new MediaRecorder();
-            mic.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mic.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mic.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mic.setOutputFile("/dev/null/");
+            mic = new MediaRecorder(new android.media.MediaRecorder());
+            mic.getMic().setAudioSource(android.media.MediaRecorder.AudioSource.MIC);
+            mic.getMic().setOutputFormat(android.media.MediaRecorder.OutputFormat.THREE_GPP);
+            mic.getMic().setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AMR_NB);
+            mic.getMic().setOutputFile("/dev/null/");
 
             try {
-                mic.prepare();
+                mic.getMic().prepare();
             } catch (IllegalStateException | IOException e) {
                 e.printStackTrace();
             }
-            mic.start();
+            mic.getMic().start();
             mEMA = 0.0;
         }
 
         double initIntensity = 0;
         while (initIntensity == 0) {
-            initIntensity = mic.getMaxAmplitude();
+            initIntensity = mic.getIntensity();
         }
-        VolumeThread thread = new VolumeThread(this, mic, initIntensity);
+        VolumeThread thread = new VolumeThread(this, mic, initIntensity, 20, 70);
 
         Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 
@@ -55,8 +54,8 @@ public class BackgroundService extends IntentService {
     @Override
     public boolean stopService(Intent name) {
         if (mic != null) {
-            mic.stop();
-            mic.release();
+            mic.getMic().stop();
+            mic.getMic().release();
             mic = null;
         }
 

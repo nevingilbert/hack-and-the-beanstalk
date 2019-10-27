@@ -1,7 +1,6 @@
 package com.example.soundtouchproject;
 
 import android.content.Context;
-import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -34,19 +33,24 @@ public class VolumeThread implements Runnable {
 
     private int currentSpeakerVolume;
 
-    public VolumeThread(Context context, MediaRecorder mic, double initIntensity) {
+    private int MIN, MAX;
+
+    public VolumeThread(Context context, MediaRecorder mic, double initIntensity, int min, int max) {
         this.context = context;
         this.mic = mic;
         this.targetIntenstiy = initIntensity;
         this.currentSpeakerVolume = getSpeakerVolume();
+
+        this.MIN = min;
+        this.MAX = max;
     }
 
     @Override
     public void run() {
 
         while (true) {
-            double micIntensity = mic.getMaxAmplitude();
-            Log.println(Log.DEBUG, "Current Speaker Volume",  Double.toString(currentSpeakerVolume));
+            double micIntensity = mic.getIntensity();
+            Log.println(Log.DEBUG, "Current Speaker Volume", Double.toString(currentSpeakerVolume));
             Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntenstiy));
             Log.println(Log.DEBUG, "Current Intensity", Double.toString(micIntensity));
 
@@ -54,13 +58,14 @@ public class VolumeThread implements Runnable {
                 Log.println(Log.DEBUG, "Feature", "No impl.");
             }
 
-            if (targetIntenstiy - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= 100) {
+            if (targetIntenstiy - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= MAX - VOLUME_CHANGE) {
                 currentSpeakerVolume += VOLUME_CHANGE;
-            } else if (micIntensity - targetIntenstiy > ERROR_INTENSITY && currentSpeakerVolume >= 0) {
+                setSpeakerVolume(currentSpeakerVolume);
+            } else if (micIntensity - targetIntenstiy > ERROR_INTENSITY && currentSpeakerVolume >= MIN + VOLUME_CHANGE) {
                 currentSpeakerVolume -= VOLUME_CHANGE;
+                setSpeakerVolume(currentSpeakerVolume);
             }
 
-            setSpeakerVolume(currentSpeakerVolume);
             previousSpeakerVolume = currentSpeakerVolume;
 
             try {
