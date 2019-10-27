@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class VolumeThread implements Runnable {
 
-    public static final double ERROR_INTENSITY = 1000;
+    public static final double ERROR_INTENSITY = 2000;
     public static final double VOLUME_CHANGE = 10;
 
     private Context context;
@@ -46,10 +46,13 @@ public class VolumeThread implements Runnable {
 
         while (true) {
             double micIntensity = mic.getMaxAmplitude();
+            Log.println(Log.DEBUG, "Current Speaker Volume",  Double.toString(currentSpeakerVolume));
+            Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntenstiy));
+            Log.println(Log.DEBUG, "Current Intensity", Double.toString(targetIntenstiy));
+
             if (previousSpeakerVolume != -1 && previousSpeakerVolume != currentSpeakerVolume) {
                 Log.println(Log.DEBUG, "Feature", "No impl.");
             }
-
 
             if (targetIntenstiy - micIntensity > ERROR_INTENSITY) {
                 currentSpeakerVolume += VOLUME_CHANGE;
