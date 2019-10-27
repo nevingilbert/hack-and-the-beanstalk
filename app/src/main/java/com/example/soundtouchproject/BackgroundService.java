@@ -1,9 +1,6 @@
 package com.example.soundtouchproject;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.media.MediaRecorder;
 import android.support.annotation.Nullable;
@@ -38,7 +35,11 @@ public class BackgroundService extends IntentService {
             mEMA = 0.0;
         }
 
-        VolumeThread thread = new VolumeThread(this, mic, mic.getMaxAmplitude());
+        double initIntensity = 0;
+        while (initIntensity == 0) {
+            initIntensity = mic.getMaxAmplitude();
+        }
+        VolumeThread thread = new VolumeThread(this, mic, initIntensity);
 
         Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 
