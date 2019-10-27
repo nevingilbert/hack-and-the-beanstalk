@@ -10,24 +10,33 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import static android.Manifest.permission.RECORD_AUDIO;
+import static com.example.soundtouchproject.VolumeThread.getSpeakerVolume;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    private boolean serviceStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button button = findViewById(R.id.button);
-        final TextView textView = findViewById(R.id.textView);
+        final ImageButton button = findViewById(R.id.startService);
+        final SeekBar volumeInput = findViewById(R.id.volumeLevelSlider);
+        final TextView volumeText = findViewById(R.id.targetVolumeLabel);
+
+        volumeText.setText("Target Volume: Service Not Started");
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
-            textView.setText("This app needs Internet permission. Please grant it.");
+            Toast.makeText(getApplicationContext(), "This app needs Internet permission. Please grant it.", Toast.LENGTH_LONG).show();
         }
 
         if (ActivityCompat.checkSelfPermission(this, RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -39,7 +48,33 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startService();
+                if (!serviceStarted) {
+                    startService();
+                    button.setImageDrawable(getDrawable(R.drawable.logored));
+                    volumeInput.setProgress(getSpeakerVolume(true));
+                } else {
+                    stopService();
+                    button.setImageDrawable(getDrawable(R.drawable.logowhite));
+                }
+            }
+        });
+
+        volumeInput.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (serviceStarted && fromUser) {
+                    volumeText.setText("Target Volume: " + progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
 
@@ -48,8 +83,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void startService() {
         Log.println(Log.DEBUG, "Service starter method", "Called");
+        serviceStarted = true;
         startService(new Intent(getApplicationContext(), BackgroundService.class));
     }
 
-    ;
+    private void stopService() {
+        Log.println(Log.DEBUG, "Service stopper", "called");
+        serviceStarted = false;
+        stopService(new Intent(getApplicationContext(), BackgroundService.class));
+
+    }
 }

@@ -15,12 +15,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class VolumeThread implements Runnable {
+public class VolumeThread extends Thread {
 
     public static final double ERROR_INTENSITY = 10;
     public static final double VOLUME_CHANGE = 5;
@@ -30,7 +31,10 @@ public class VolumeThread implements Runnable {
     private MediaRecorder mic;
 
     //initial overall volume
-    private double targetIntenstiy;
+    private double targetIntensity;
+
+    private final AtomicBoolean loop = new AtomicBoolean(false);
+    public volatile boolean loopPrim = false;
 
 
     private int currentSpeakerVolume;
@@ -40,7 +44,7 @@ public class VolumeThread implements Runnable {
     public VolumeThread(Context context, MediaRecorder mic, double initIntensity, int min, int max) {
         this.context = context;
         this.mic = mic;
-        this.targetIntenstiy = initIntensity;
+        this.targetIntensity = initIntensity;
         this.currentSpeakerVolume = getSpeakerVolume(false);
 
         this.MIN = min;
@@ -49,13 +53,17 @@ public class VolumeThread implements Runnable {
 
     @Override
     public void run() {
-
-        while (true) {
+        loop.set(true);
+        loopPrim = true;
+        while (!Thread.currentThread().isInterrupted() && loop.get() && loopPrim) {
             double micIntensity = mic.getIntensity();
             Log.println(Log.DEBUG, "Current Speaker Volume", Double.toString(currentSpeakerVolume));
-            Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntenstiy));
+            Log.println(Log.DEBUG, "Target Intensity", Double.toString(targetIntensity));
             Log.println(Log.DEBUG, "Current Intensity", Double.toString(micIntensity));
 
+            if (!loop.get() || !loopPrim) {
+                return;
+            }
 
             //TODO: Verify
             if (currentSpeakerVolume != getSpeakerVolume(true)) {
@@ -64,15 +72,15 @@ public class VolumeThread implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                targetIntenstiy = micIntensity;
+                targetIntensity = micIntensity;
                 currentSpeakerVolume = getSpeakerVolume(true);
                 Log.println(Log.DEBUG, "Feature", "Normalized Target");
             }
 
-            if (targetIntenstiy - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= MAX - VOLUME_CHANGE) {
+            if (targetIntensity - micIntensity > ERROR_INTENSITY && currentSpeakerVolume <= MAX - VOLUME_CHANGE) {
                 currentSpeakerVolume += VOLUME_CHANGE;
                 setSpeakerVolume(currentSpeakerVolume);
-            } else if (micIntensity - targetIntenstiy > ERROR_INTENSITY && currentSpeakerVolume >= MIN + VOLUME_CHANGE) {
+            } else if (micIntensity - targetIntensity > ERROR_INTENSITY && currentSpeakerVolume >= MIN + VOLUME_CHANGE) {
                 currentSpeakerVolume -= VOLUME_CHANGE;
                 setSpeakerVolume(currentSpeakerVolume);
             }
@@ -126,7 +134,7 @@ public class VolumeThread implements Runnable {
         queue.add(stringRequest);
     }
 
-    private int getSpeakerVolume(boolean target) {
+    public static int getSpeakerVolume(boolean target) {
         OkHttpClient client = new OkHttpClient();
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -164,13 +172,27 @@ public class VolumeThread implements Runnable {
             end = responseString.indexOf("</actualvolume>");
         }
 
-        Log.println(Log.DEBUG, "SubstringStart", Integer.toString(start));
-        Log.println(Log.DEBUG, "SubstringEnd", Integer.toString(end));
-
-        if (start < 0 || end > responseString.length()) {
+        if (start < 0 || end > responseString.length() || responseString.length() == 0) {
             return -1;
         }
 
         return Integer.parseInt(responseString.substring(start, end));
+    }
+
+//    public void stop() {
+//        if (mic != null) {
+//            mic.getMic().stop();
+//            mic.getMic().release();
+//            mic = null;
+//        }
+//        loop.set(false);
+//        Log.println(Log.DEBUG, "AM I REACHING THIS?", "YES");
+//        Thread.currentThread().interrupt();
+//    }
+
+    public void setLoop(boolean in) {
+        Log.println(Log.ERROR, "HELP", "HELP");
+        loop.set(in);
+        loopPrim = in;
     }
 }
