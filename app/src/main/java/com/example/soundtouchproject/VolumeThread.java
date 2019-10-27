@@ -170,7 +170,10 @@ public class VolumeThread implements Runnable {
         if (start < 0 || end > responseString.length()) {
             return -1;
         }
-
-        return Integer.parseInt(responseString.substring(start, end));
+        try {
+            return Integer.parseInt(responseString.substring(start, end));
+        } catch (Exception e) {
+            throw new RuntimeException("A response was expected but nothing was recieved. Please check your internet connection.");
+        }
     }
 }
