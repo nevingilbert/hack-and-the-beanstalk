@@ -9,8 +9,10 @@ import java.io.IOException;
 
 public class BackgroundService extends IntentService {
 
+    public final int MIN = 20;
+    public final int MAX = 70;
+
     private MediaRecorder mic = null;
-    private double mEMA = 0.0;
 
     public BackgroundService() {
         super("Background Speaker Service");
@@ -31,19 +33,24 @@ public class BackgroundService extends IntentService {
                 e.printStackTrace();
             }
             mic.getMic().start();
-            mEMA = 0.0;
         }
 
-        double initIntensity = 0;
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        long startTime = System.currentTimeMillis();
+
+        int n = 0;
+        double sum = 0;
+
+        while (System.currentTimeMillis() < startTime + 2000) {
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sum += mic.getIntensity();
+            n++;
         }
-        while (initIntensity == 0) {
-            initIntensity = mic.getIntensity();
-        }
-        VolumeThread thread = new VolumeThread(getApplicationContext(), mic, initIntensity, 20, 70);
+
+        VolumeThread thread = new VolumeThread(getApplicationContext(), mic, 1.1 * sum / n, MIN, MAX);
 
         Log.println(Log.DEBUG, "BACKGROUND SERVICE STARTED", "SERVICE STARTED");
 
